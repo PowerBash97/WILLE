@@ -1,0 +1,15 @@
+# Entornos virtuales
+venv/
+.venv/
+env/
+
+# Caché de Python
+__pycache__/
+*.pyc
+
+# Archivos de sesión (opcional, por si pesan mucho)
+# *.wille
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
