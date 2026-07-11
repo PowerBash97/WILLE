@@ -88,7 +88,7 @@ Dicho panel permite elegir si la consulta se basará en Objetos o Atributos, sel
 
 Desplegable desde la pestaña izquierda, este panel permite hacer un cribado del total de conceptos formales, encontrando aquellos que contengan un determinado subconjunto de objetos o atributos de interés para el usuario, en su extensión o intensión, respectivamente. De forma complementaria, mediante este panel se puede consultar la lista de superconceptos o subconceptos directos asociados a uno conocido, realizando la búsqueda a partir de la extensión o intensión del mismo, respectivamente.
 
-En la siguiente figura se muestran por ejemplo los resultados del búsqueda por el atributo *B*, así como la selección del primer resultado. Este caso ilustra a la perfección la funcionalidad previamente comentada: debido a que el subconjunto $\{B\}$ coincide con la intensión de un concepto formal existente, al hacer la búsqueda asociada, los resultados listados empiezan por dicho concepto formal, siguiendo a continuación por sus superconceptos inmediatos (que aparecen al mismo tiempo destacados visualmente en la propia vista del diagrama).
+En la siguiente figura se muestran por ejemplo los resultados del búsqueda por el atributo *B*, así como la selección del primer resultado. Este caso ilustra a la perfección la funcionalidad previamente comentada: debido a que el subconjunto $\{B\}$ coincide con la intensión de un concepto formal existente, al hacer la búsqueda asociada, los resultados listados empiezan por dicho concepto formal, siguiendo a continuación por sus subconceptos inmediatos (que aparecen al mismo tiempo destacados visualmente en la propia vista del diagrama).
 
 ![Interfaz del panel lateral Buscador.](img/manual_panel_buscador.jpg)
 
