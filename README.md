@@ -1,8 +1,8 @@
-# WilLE (Wille's Interactive Lattice Explorer)
+# WILLE (Web-based Interactive concept Lattice's Line diagram Explorer)
 
-Bienvenido al repositorio oficial de **WilLE**, una aplicación web local e interactiva que versa sobre **Análisis de Conceptos Formales (ACF)**, desarrollada como Trabajo de Fin de Grado. 
+Bienvenido al repositorio oficial de **WILLE**, una aplicación web local e interactiva que versa sobre **Análisis de Conceptos Formales (ACF)**, desarrollada como Trabajo de Fin de Grado. 
 
-Este proyecto nace con el objetivo de facilitar una herramienta interactiva que permita al usuario explorar visualmente el **Retículo de Conceptos** asociado a un **Contexto Formal** de forma dinámica y escalable. Construida íntegramente en Python utilizando el *framework* Dash y haciendo uso de la librería de ACF Concepts, la aplicación está diseñada para mitigar la sobrecarga cognitiva inherente a los retículos densos. Para ello, WilLE presenta un entorno de trabajo basado en vistas locales, que permite al usuario navegar a través del diagrama de Hasse correspondiente al retículo, por medio de la selección en tiempo real del nodo central de la vista (de forma manual, localizando por derivación, así como aplicando filtrados) así como el ajuste del radio de amplitud visual (zoom) alrededor de dicho nodo. Por otro lado, WilLE soporta de forma nativa la persistencia de sesiones, permitiendo al usuario exportar la sesión de exploración en un archivo para posteriormente restaurar su estado.
+Este proyecto nace con el objetivo de facilitar una herramienta interactiva que permita al usuario explorar visualmente el **Retículo de Conceptos** asociado a un **Contexto Formal** de forma dinámica y escalable. Construida íntegramente en Python utilizando el *framework* Dash y haciendo uso de la librería de ACF Concepts, la aplicación está diseñada para mitigar la sobrecarga cognitiva inherente a los retículos densos. Para ello, WILLE presenta un entorno de trabajo basado en vistas locales, que permite al usuario navegar a través del diagrama de Hasse correspondiente al retículo, por medio de la selección en tiempo real del nodo central de la vista (de forma manual, localizando por derivación, y realizando búsquedas asociadas a un subconjunto de objetos o atributos de interés) así como el ajuste del radio de amplitud visual (zoom) alrededor de dicho nodo. Por otro lado, WILLE soporta de forma nativa la persistencia de sesiones, permitiendo al usuario exportar la sesión de exploración en un archivo para posteriormente restaurar su estado.
 
 ---
 
@@ -27,7 +27,7 @@ Este proyecto nace con el objetivo de facilitar una herramienta interactiva que 
    
 4. Instalar las dependencias necesarias: `pip install -r requirements.txt`
 5. Ejecutar la aplicación: `python app.py` (y acceder desde su navegador web a la dirección local que proporcionará la consola, habitualmente `http://127.0.0.1:8050/`).
-6. *Finalización:* Para detener la ejecución de WilLE, pulse `Ctrl + C` en la terminal y, a continuación, ejecute el comando `deactivate` para cerrar de forma segura el entorno virtual.
+6. *Finalización:* Para detener la ejecución de WILLE, pulse `Ctrl + C` en la terminal y, a continuación, ejecute el comando `deactivate` para cerrar de forma segura el entorno virtual.
 
 ## Linux y MacOS
 
@@ -36,7 +36,7 @@ Este proyecto nace con el objetivo de facilitar una herramienta interactiva que 
 3. Activar el entorno virtual: `source venv/bin/activate`
 4. Instalar las dependencias necesarias: `pip install -r requirements.txt`
 5. Ejecutar la aplicación: `python app.py` (y acceder desde su navegador web a la dirección local que proporcionará la consola, habitualmente `http://127.0.0.1:8050/`).
-6. *Finalización:* Para detener la ejecución de WilLE, pulse `Ctrl + C` en la terminal y, a continuación, ejecute el comando `deactivate` para cerrar de forma segura el entorno virtual.
+6. *Finalización:* Para detener la ejecución de WILLE, pulse `Ctrl + C` en la terminal y, a continuación, ejecute el comando `deactivate` para cerrar de forma segura el entorno virtual.
 
 ---
 
@@ -72,7 +72,7 @@ El espacio central de la pantalla se divide en tres componentes fundamentales:
 * **Lienzo interactivo:** La región que ocupa la mayor parte del espacio en pantalla, dedicada a mostrar la vista local del diagrama asociado al retículo de conceptos. El usuario puede interactuar directamente con este espacio para hacer clic sobre cualquier nodo y convertirlo en el nuevo centro de la vista, destacando visualmente dicho nodo en color verde, así como sus vecinos superiores (superconceptos inmediatos) en color cian, y sus vecinos inferiores (subconceptos inmediatos) en color magenta.
 * **Panel Inferior de Inspección:** En la parte inferior de la pantalla se dispone de un cuadro de texto que muestra en tiempo real la Extensión (objetos) e Intensión (atributos) asociadas al Concepto formal seleccionado como nodo central de la vista en cada momento.
 
-Así mismo, como se puede atisbar, se dispone de sendas pestañas laterales que actúan como conmutadores, desplegando/replegando los paneles "Derivador" y "Filtro", respectivamente. A continuación se pasa a detallar estos:
+Así mismo, como se puede atisbar, se dispone de sendas pestañas laterales que actúan como conmutadores, desplegando/replegando los paneles "Derivador" y "Buscador", respectivamente. A continuación se pasa a detallar estos:
 
 ### Panel *Derivador* (Localizar mediante derivación)
 
@@ -84,12 +84,12 @@ En la siguiente figura puede verse por ejemplo el resultado de localizar el conc
 
 Dicho panel permite elegir si la consulta se basará en Objetos o Atributos, seleccionar los elementos deseados, y finalmente pulsando el botón "Localizar", se procede a calcular el concepto formal asociado a dicho subconjunto, recentrar la vista estableciendo este último como el nodo focal, así como mostrar la extensión e intensión del mismo en un cuadro de texto complementario al panel inferior (para una inspección más rápida de la información).
 
-### Panel *Filtro* (Filtrar conceptos formales de interés)
+### Panel *Buscador* (Buscar conceptos formales)
 
-Desplegable desde la pestaña izquierda, este panel permite filtrar el total de conceptos formales, encontrando aquellos que contengan un determinado subconjunto de objetos o atributos de interés para el usuario, en su extensión o intensión, respectivamente.
+Desplegable desde la pestaña izquierda, este panel permite hacer un cribado del total de conceptos formales, encontrando aquellos que contengan un determinado subconjunto de objetos o atributos de interés para el usuario, en su extensión o intensión, respectivamente. De forma complementaria, mediante este panel se puede consultar la lista de superconceptos o subconceptos directos asociados a uno conocido, realizando la búsqueda a partir de la extensión o intensión del mismo, respectivamente.
 
-En la siguiente figura se muestran por ejemplo los resultados del filtrado por el atributo *B*, así como la selección del segundo resultado (el nodo asociado al concepto formal con extensión {Obj1, Obj3} e intensión {B, D}).
+En la siguiente figura se muestran por ejemplo los resultados del búsqueda por el atributo *B*, así como la selección del primer resultado. Este caso ilustra a la perfección la funcionalidad previamente comentada: debido a que el subconjunto $\{B\}$ coincide con la intensión de un concepto formal existente, al hacer la búsqueda asociada, los resultados listados empiezan por dicho concepto formal, siguiendo a continuación por sus superconceptos inmediatos (que aparecen al mismo tiempo destacados visualmente en la propia vista del diagrama).
 
-![Interfaz del panel lateral Filtrado.](img/manual_panel_filtrado.jpg)
+![Interfaz del panel lateral Buscador.](img/manual_panel_buscador.jpg)
 
-De forma similar al panel anterior, este también permite elegir si la consulta se basará en Objetos o Atributos, así como seleccionar los elementos deseados. Así mismo, ofrece la posibilidad de establecer el criterio de ordenación en que serán presentados los resultados (en orden ascendente o descendente del cardinal de la extensión del concepto, o bien en orden lexicográfico ascendente o descendente de la intensión del mismo). Finalmente, tras pulsar el botón "Filtrar", se obtienen los resultados de dicho filtrado, no presentándose más de 50 resultados por cuestiones de legibilidad, y por cuestiones de rendimiento, el tiempo de respuesta en cualquier caso tampoco excederá los 4s.
+De forma similar al panel anterior, este también permite elegir si la consulta se basará en Objetos o Atributos, así como seleccionar los elementos deseados. Así mismo, ofrece la posibilidad de establecer el criterio de ordenación en que serán presentados los resultados (en orden ascendente o descendente del cardinal de la extensión o de la intensión del concepto, en función de si se consideró un subconjunto de objetos o atributos, respectivamente). Finalmente, tras pulsar el botón "Buscar", se obtienen los resultados de dicha búsqueda, no presentándose más de $50$ resultados por cuestiones de legibilidad, y por cuestiones de rendimiento, el tiempo de respuesta en cualquier caso tampoco excederá los $4s$.

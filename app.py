@@ -149,7 +149,7 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
             
             # 3) Deserializar con pickle (recuperando la estructura de datos original, el 
             # diccionario con cinco entradas conteniendo toda la información necesaria para 
-            # representar el retículo e interactuar visualmente con él, así como derivar/filtrar)
+            # representar el retículo e interactuar visualmente con él, así como localizar/buscar)
             datos_sesion = pickle.loads(decoded_original)
             
             # 4) Interpretar todos los datos de la sesión:
@@ -244,7 +244,7 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
             # ---------------------------------------------------------------------------------
             # iii) Cálculo de las Coordenadas tipo "Grid" del diagrama de Hasse del Retículo 
             #      + 
-            #      Identificar los nodos supremo e ínfimo global
+            #      Identificar los nodos asociados a los conceptos supremo e ínfimo global
 
             coordenadas_absolutas = calcular_coordenadas_absolutas_diagrama(lista_conceptos, concepto_a_id)
             id_infimo, id_supremo = identificar_extremos_del_reticulo(lista_conceptos)
@@ -270,7 +270,7 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
                 lineas_reducida = []
                 objetos_propios, atributos_propios = filtrar_objetos_y_atributos_propios(c)
                 
-                # Si se trata del nodo supremo o ínfimo global del retículo, se identifican también como 
+                # Si se trata del nodo asociado al concepto supremo o ínfimo global del retículo, se identifican también como 
                 # los nodos [1] y [0], respectivamente (para identificarlos visualmente con más facilidad)
                 if cid == id_supremo: lineas_reducida.append("[1]")
                 elif cid == id_infimo: lineas_reducida.append("[0]")
@@ -398,17 +398,17 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
 #    - Otro para navegar por clic (actualizando el centro de la vista al nodo clicado),
 #      gestionar la localización de un concepto formal mediante el panel lateral "Derivador"
 #      (actualizando también el centro de vista a dicho nodo), así como actualizar la vista 
-#      si se selecciona alguno de los resultados de un Filtrado (pulsando el botón "dinámico" 
-#      correspondiente).
+#      si se selecciona alguno de los resultados de una Búsqueda (pulsando el botón "dinámico" 
+#      correspondiente en el panel "Buscador").
 #      NOTA: Es necesario englobar todas estas funcionalidades bajo un mismo callback, a 
 #            fin de que sólo uno sea el encargado de modificar la misma variable (el 
 #            centro de vista), y evitar así cualquier error lógico derivado de esta 
 #            concurrencia de peticiones.
 #
-#    - Otro para Ejecutar un filtrado (i.e. obtener los conceptos formales que contengan
-#      en su extensión/intensión un determinado subconjunto de objetos/atributos, respectivamente)
-#      añadiendo un botón a cada uno de los conceptos resultantes listados, para permitir
-#      centrar la vista en estos.
+#    - Otro para ejecutar una Búsqueda en el panel "Buscador" (i.e. obtener los conceptos 
+#      formales que contengan en su extensión/intensión un determinado subconjunto de 
+#      objetos/atributos, respectivamente) añadiendo un botón a cada uno de los conceptos 
+#      resultantes listados, para permitir centrar la vista en estos.
 #
 #    - Otro para actualizar el panel inferior de "Inspección", con la Extensión e Intensión
 #      asociadas al concepto formal central de la vista en cada momento.
@@ -416,7 +416,7 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
 #    - Otro para Guardar/Exportar la sesión (almacenando de forma persistente, en un archivo .wille, 
 #      toda la información necesaria relativa a la sesión)
 #
-#    - Otros para gestiones "menores" de los dos paneles laterales (Derivador y Filtrado), a saber:
+#    - Otros para gestiones "menores" de los dos paneles laterales (Derivador y Buscador), a saber:
 #      a) Abrir y Cerrar los paneles pulsando el botón correspondiente
 #      b) Actualizar las opciones del Dropdown de selección del panel (y que dependerán de
 #         si se eligió escoger atributos u objetos)
@@ -429,8 +429,8 @@ def iniciar_exploracion(btn_nuevo, btn_restaurar, tab_activa, val_ejemplo, val_c
 #  
 # - El nodo central: Ya sea porque el usuario haya hecho clic en un nodo nuevo, o se ha localizado  
 #   el concepto formal asociado a un subconjunto de elementos en el panel "Derivador",
-#   o se ha clicado sobre un botón "dinámico" en alguno de los resultados de un filtrado
-#   en el panel de "Filtrado" (El ID del nodo central 'centro-store' ha cambiado de valor)
+#   o se ha clicado sobre un botón "dinámico" en alguno de los resultados de una búsqueda
+#   en el panel "Buscador" (El ID del nodo central 'centro-store' ha cambiado de valor)
 #
 # - El nivel de Zoom: Se ha movido el slider de "Zoom lógico" (debiendo considerar una vista
 #   ampliada o reducida, tanto en cuanto a niveles en altura mostrados por encima y debajo 
@@ -518,7 +518,7 @@ def vista_local_reticulo(centro_id, nivel_zoom):
         if nid in super_del_centro: rol_nodo = 'super'
         elif nid in sub_del_centro: rol_nodo = 'sub'
         
-        # Filtro (solo dejamos aquellos nodos que estén dentro del límite de 
+        # Filtrado (solo dejamos aquellos nodos que estén dentro del límite de 
         # distancia horizontal o de distancia máxima en cuanto a nivel - i.e. 
         # el nivel de "zoom lógico") -> Solo estos se añadirán como nodos visibles
         if distancia_y <= nivel_zoom and distancia_x <= radio_visual_x:
@@ -553,7 +553,7 @@ def vista_local_reticulo(centro_id, nivel_zoom):
     pos_nodos = {n['data']['id']: n['position'] for n in nodos_master}
 
     # Empezaremos por extraer las coordenadas REALES de los nodos que han sobrevivido 
-    # al filtro de la vista local (para calcular la posición tanto de las aristas 
+    # al filtrado de la vista local (para calcular la posición tanto de las aristas 
     # "discontinuas", como de los indicadores visuales, sin dejar grandes espacios 
     # arbitrariamente, sino en base a los límites de los nodos que se van a representar 
     # - i.e. adaptando su posición a los nodos finalmente visualizados)
@@ -570,7 +570,7 @@ def vista_local_reticulo(centro_id, nivel_zoom):
 
     # c) Rastreo de los NODOS OCULTOS
     # 
-    # Se rastrean los nodos "ocultos" (los que no sobrevivieron al filtro espacial)
+    # Se rastrean los nodos "ocultos" (los que no sobrevivieron al filtrado espacial)
     # y en función de su posición relativa a la caja delimitadora "estricta" de la vista
     # local considerada, se guarda su rol en el "rastreador" correspondiente (para localizar 
     # en qué dirección estaría respecto a la vista local, y poder mostrar los indicadores 
@@ -769,9 +769,9 @@ def vista_local_reticulo(centro_id, nivel_zoom):
 #      
 #    - Actualizar el centro de vista cuando se pulsa uno de los botones 
 #      "dinámicos" (en el sentido de que no son un número fijo, sino que 
-#      aparecen en función del filtrado concreto que se lleve a cabo, y cada 
-#      uno lleva el ID de un nodo concreto en el retículo) en el panel de 
-#      Filtrado
+#      aparecen en función de la búsqueda concreta que se lleve a cabo, y 
+#      cada uno lleva el ID de un nodo en particular en el retículo) en el 
+#      panel "Buscador"
 
 @app.callback(
     Output("derivador-resultados", "children"),
@@ -796,7 +796,7 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
         # Actualizamos el centro ("centro-store"), pero no el texto del panel ("derivador-resultados")
         return no_update, tap_data['id']
 
-    # 2) Consulta desde el Panel de "Derivador" (Obtener el Concepto Formal asociado)
+    # 2) Consulta desde el Panel "Derivador" (Obtener el Concepto Formal asociado)
     if disparador_id == 'btn-ejecutar-derivador': 
         if not elementos_seleccionados: # Si no se han seleccionado aún elementos para el subconjunto de la consulta
             # Actualizamos solo el texto del panel con un mensaje de error
@@ -841,18 +841,18 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
         except Exception as e:
             return f"[X] Error: {str(e)}", no_update
         
-    # 3) Clic en un botón "dinámico" del Panel de Filtrado
+    # 3) Clic en un botón "dinámico" del Panel "Buscador"
     #
     # Nótese que de los tres eventos escuchados por este callback (los tres parámetros "Input"),
     # los dos primeros tienen un ID normal (son simples cadenas de texto), mientras 
     # que el tercero tiene un ID dinámico (es un diccionario), por lo que para capturar este 
     # último caso, es necesario hacer una comprobación explícita sobre si es una instancia de 
     # la clase "dict" (un Diccionario nativo de Python), en cuyo caso, se pasa a comprobar si
-    # el valor asociado a su clave 'type' es el relativo a un botón dinámico del panel de filtrado
+    # el valor asociado a su clave 'type' es el relativo a un botón dinámico del panel "Buscador"
     if isinstance(disparador_id, dict) and disparador_id.get('type') == 'btn-centrar-dinamico':
 
         # NOTA: Para evitar problemas con "clics fantasma" (i.e. aparentemente se centra la vista
-        # en uno de los conceptos listados al filtrar, sin ni siquiera haber clicado sobre ninguno)
+        # en uno de los conceptos listados tras la búsqueda, sin ni siquiera haber clicado sobre ninguno)
         # es necesario ignorar explícitamente el evento de "nacimiento" de estos botones, para lo
         # cual basta con leer el número de clics, y si dicho valor es 'None' significa que acaba de
         # renderizarse en pantalla, pudiendo entonces ignorarse.
@@ -865,7 +865,7 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
             return no_update, no_update # Ignoramos el evento de "nacimiento"
 
         # En otro caso, actualizamos el centro de la vista en consecuencia, a partir del 
-        # índice del botón dinámico concreto que fue pulsado en el panel de filtrado
+        # índice del botón dinámico concreto que fue pulsado en el panel "Buscador"
         nuevo_centro_id = disparador_id['index']
         return no_update, nuevo_centro_id
     
@@ -876,7 +876,7 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
     return no_update, no_update
 
 # ---------------------------------------------------------------------------------------
-# iii) Ejecución de los filtrados del panel lateral izquierdo:
+# iii) Ejecución de las Búsquedas del panel lateral izquierdo:
 #      
 #      Esencialmente, una vez seleccionado el subconjunto de elementos 
 #      (objetos o atributos) se itera por la lista de conceptos formales del
@@ -886,6 +886,12 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
 #      el número de elementos en su extensión e intensión, como el listado de
 #      estos elementos, y se inserta un botón para permitir centrar la vista
 #      en dicho concepto formal)
+#
+#      Así mismo, cuando el subconjunto seleccionado corresponda con la extensión
+#      (si constaba de objetos) o la intensión (si eran atributos) de un concepto
+#      formal existente, se destacarán visualmente los resultados relativos a 
+#      estos conceptos formales, para mayor claridad del usuario, usando la misma
+#      convención de colores empleada en las vistas locales del diagrama del retículo.
 #
 #      Por otro lado, se dispone de dos límites, uno de tiempo (especialmente 
 #      necesario en retículos cercanos al límite de tamaño impuesto por medio 
@@ -902,19 +908,19 @@ def actualizar_centro_vista(tap_data, n_clicks_btn, n_clicks_dinamicos, tipo_ent
 # para almacenar exactamente el ID del nodo relativo al retículo de conceptos
 
 @app.callback(
-    Output("filtro-resultados", "children"),
-    Input("btn-ejecutar-filtro", "n_clicks"),
-    State("filtro-tipo", "value"),
-    State("filtro-seleccion", "value"),
-    State("filtro-orden", "value"),
+    Output("buscador-resultados", "children"),
+    Input("btn-ejecutar-buscador", "n_clicks"),
+    State("buscador-tipo", "value"),
+    State("buscador-seleccion", "value"),
+    State("buscador-orden", "value"),
     prevent_initial_call=True
 )
-def ejecutar_filtrado(n_clicks, tipo, seleccion, orden):
+def ejecutar_busqueda(n_clicks, tipo, seleccion, orden):
     if not seleccion: # Si no se ha seleccionado aún ningún elemento en el dropdown
         return html.P("Selecciona al menos un elemento.")
     
-    # 1) Se ejecuta el filtrado, llamando a la función auxiliar
-    resultados, timeout_alcanzado = filtrar_conceptos_formales_por_subconjunto(tipo, seleccion, lista_conceptos)
+    # 1) Se ejecuta la búsqueda, llamando a la función auxiliar
+    resultados, timeout_alcanzado, base_cid, vecinos_super, vecinos_sub = buscar_por_subconjunto(tipo, seleccion, lista_conceptos, concepto_a_id, nodos_master)
                 
     # Si se termina de iterar por los conceptos del retículo sin obtener
     # resultado alguno, pero tampoco se llegó a alcanzar el timeout, se 
@@ -926,53 +932,85 @@ def ejecutar_filtrado(n_clicks, tipo, seleccion, orden):
     #
     # 2) Se ordenan los resultados según el criterio que haya especificado el 
     # usuario
-    if orden == 'nivel_asc': # Nivel o Número de objetos en la Extensión ascendente
+    if orden == 'ext_asc': # Número de objetos (cardinal) en la Extensión ascendente
         resultados.sort(key=lambda c: len(c.extent))
-    elif orden == 'nivel_desc': # Nivel o Número de objetos en la Extensión descendente 
+    elif orden == 'ext_desc': # Número de objetos (cardinal) en la Extensión descendente 
         resultados.sort(key=lambda c: len(c.extent), reverse=True)
-    elif orden == 'alfa_attr_asc': # Orden lexicográfico de la Intensión de los conceptos
-        resultados.sort(key=lambda c: normalizar_para_ordenar(c.intent))
-    elif orden == 'alfa_attr_desc':
-        resultados.sort(key=lambda c: normalizar_para_ordenar(c.intent), reverse=True)
+    elif orden == 'int_asc': # Número de atributos (cardinal) en la Intensión ascendente
+        resultados.sort(key=lambda c: len(c.intent))
+    elif orden == 'int_desc': # Número de atributos (cardinal) en la Intensión descendente
+        resultados.sort(key=lambda c: len(c.intent), reverse=True)
         
     # Lista de elementos visuales que poblarán el cuadro de texto del panel
-    # de filtrado (donde se mostrarán los resultados)
-    lista_ui = [] 
-    
+    # de Búsqueda (donde se mostrarán los resultados)
+    lista_ui = []
+
     # 3) Mensajes de aviso (si saltaron los sistemas de seguridad - o bien el timeout, o el 
     # límite de resultados a mostrar - en cualquier caso indicar el número de resultados 
-    # obtenidos e indicar que solo se muestran los primeros hasta "MAX_RESULTADOS_FILTRO"
+    # obtenidos e indicar que solo se muestran los primeros hasta "MAX_RESULTADOS_BUSQUEDA"
     #
     # Caso 1: Se alcanzó el límite de tiempo de espera (timeout)
     if timeout_alcanzado:
         lista_ui.append(html.Div([
-            html.P(f"[!] Búsqueda abortada a los {MAX_TIMEOUT}s para evitar colapso. Se han recuperado {len(resultados)} conceptos. Mostrando solo los primeros {MAX_RESULTADOS_FILTRO} para no saturar el panel.", 
+            html.P(f"[!] Búsqueda abortada a los {MAX_TIMEOUT}s para evitar colapso. Se han recuperado {len(resultados)} conceptos. Mostrando solo los primeros {MAX_RESULTADOS_BUSQUEDA} para no saturar el panel.", 
                    style={'color': '#D32F2F', 'fontWeight': 'bold', 'fontSize': '12px'}),
             html.Hr()
         ]))
     # Caso 2: No se alcanzó el Timeout, pero sí se superó el número máximo de resultados a mostrar
-    elif len(resultados) > MAX_RESULTADOS_FILTRO:
+    elif len(resultados) > MAX_RESULTADOS_BUSQUEDA:
         lista_ui.append(html.Div([
-            html.P(f"Éxito. Se han encontrado {len(resultados)} conceptos. Mostrando solo los primeros {MAX_RESULTADOS_FILTRO} para no saturar el panel.", 
+            html.P(f"Éxito. Se han encontrado {len(resultados)} conceptos. Mostrando solo los primeros {MAX_RESULTADOS_BUSQUEDA} para no saturar el panel.", 
                    style={'color': '#E65100', 'fontWeight': 'bold', 'fontSize': '12px'}),
             html.Hr()
         ]))
 
     # 4) En cualquier caso, se genera la lista de elementos visuales para los 
-    # primeros resultados obtenidos (hasta el tope "MAX_RESULTADOS_FILTRO")
-    for c in resultados[:MAX_RESULTADOS_FILTRO]:
+    # primeros resultados obtenidos (hasta el tope "MAX_RESULTADOS_BUSQUEDA")
+    for c in resultados[:MAX_RESULTADOS_BUSQUEDA]:
         cid = concepto_a_id[c] # El ID del concepto, se puede obtener del diccionario "concepto_a_id"
+        
+        # Estilo base para cada resultado individual
+        estilo_resultado = {
+            'padding': '12px', 
+            'borderRadius': '6px', 
+            'marginBottom': '10px', 
+            'border': '1px solid #ddd',
+            'backgroundColor': 'white',
+            'boxShadow': '0 2px 4px rgba(0,0,0,0.05)'
+        }
+        etiqueta_rol = ""
+        
+        # Para los casos especiales (resultados relativos al concepto formal asociado
+        # al subconjunto de elementos seleccionado, o sus vecinos superiores o inferiores)
+        # se sobreescribe el estilo, para destacarlos visualmente. En particular, se aplican 
+        # colores coincidentes con los roles del lienzo de Cytoscape (de las vistas locales).
+        if cid == base_cid: # Verde (Nodo Focal)
+            estilo_resultado['backgroundColor'] = '#E8F5E9' 
+            estilo_resultado['borderLeft'] = '5px solid #2E7D32'
+            etiqueta_rol = html.Span(" [Concepto Formal asociado]", style={'color': '#2E7D32', 'fontWeight': 'bold', 'fontSize': '11px'})
+        elif cid in vecinos_super: # Azul (Superconcepto inmediato)
+            estilo_resultado['backgroundColor'] = '#E3F2FD' 
+            estilo_resultado['borderLeft'] = '5px solid #1976D2'
+            etiqueta_rol = html.Span(" [Superconcepto Inmediato]", style={'color': '#1976D2', 'fontWeight': 'bold', 'fontSize': '11px'})
+        elif cid in vecinos_sub: # Magenta (Subconcepto inmediato)
+            estilo_resultado['backgroundColor'] = '#FCE4EC' 
+            estilo_resultado['borderLeft'] = '5px solid #C2185B'
+            etiqueta_rol = html.Span(" [Subconcepto Inmediato]", style={'color': '#C2185B', 'fontWeight': 'bold', 'fontSize': '11px'})
+        
         lista_ui.append(html.Div([
+            # Etiqueta en caso de que el resultado corresponda al concepto formal asociado a 
+            # la selección de objetos/atributos, o bien a un sub/super-concepto directo de este
+            html.P([etiqueta_rol], style={'margin': '0', 'fontSize': '12px', 'color': 'gray'}),
             # Elementos de la Extensión (Objetos)
-            html.P(f"Ext ({len(c.extent)}): {','.join(c.extent) if c.extent else 'Ø'}", style={'margin': '2px 0', 'fontSize': '12px'}),
+            html.P(f"Ext ({len(c.extent)}): {','.join(c.extent) if c.extent else 'Ø'}", style={'margin': '4px 0', 'fontSize': '12px'}),
             # Elementos de la Intensión (Atributos)
-            html.P(f"Int ({len(c.intent)}): {','.join(c.intent) if c.intent else 'Ø'}", style={'margin': '2px 0', 'fontSize': '12px'}),
+            html.P(f"Int ({len(c.intent)}): {','.join(c.intent) if c.intent else 'Ø'}", style={'margin': '4px 0', 'fontSize': '12px'}),
             # Botón para centrar la vista en dicho Concepto formal (se le inserta el ID del concepto en el campo 'index')
             html.Button("Centrar aquí", id={'type': 'btn-centrar-dinamico', 'index': cid}, style={
-                'backgroundColor': '#1976D2', 'color': 'white', 'border': 'none', 'borderRadius': '3px', 'cursor': 'pointer'
+                'backgroundColor': '#E64A19', 'color': 'white', 'border': 'none', 'borderRadius': '3px', 'cursor': 'pointer', 'padding': '5px 10px', 'marginTop': '5px'
             }),
             html.Hr(style={'margin': '10px 0'}) # Barra horizontal que separa cada resultado del siguiente
-        ]))
+        ], style=estilo_resultado))
         
     return lista_ui
 
@@ -1184,38 +1222,56 @@ def actualizar_dropdown_derivador(tipo_entrada):
     # objetos)
     return opciones, [] 
 
-# -------------------------------------------------------
-# Panel de "Filtrado" (muy similar al panel "Derivador"):
+# ----------------------------------------------------
+# Panel "Buscador" (muy similar al panel "Derivador"):
 #
 # 1) Abrir y cerrar el panel (totalmente análogo al panel "Derivador",
 #    salvo porque este está situado a la izquierda - basta cambiar 
 #    "right" por "left")
 @app.callback(
-    Output("panel-lateral-filtrado", "style"),
-    Input("btn-abrir-cerrar-filtrado", "n_clicks"),
-    State("panel-lateral-filtrado", "style"),
+    Output("panel-lateral-buscador", "style"),
+    Input("btn-abrir-cerrar-buscador", "n_clicks"),
+    State("panel-lateral-buscador", "style"),
     prevent_initial_call=True
 )
-def desplegar_panel_filtrado(n_clicks, style):
+def desplegar_panel_buscador(n_clicks, style):
     if style.get("left") == "0px": 
         style["left"] = "-350px"
     else: 
         style["left"] = "0px"
     return style
 
-# 2) Actualizar las opciones del dropdown (igual que en el panel "Derivador")
+# 2) Actualizar las opciones del dropdown para seleccionar elementos (igual que 
+#    en el panel "Derivador")
 @app.callback(
-    Output("filtro-seleccion", "options"),
-    Output("filtro-seleccion", "value"),
-    Input("filtro-tipo", "value")
+    Output("buscador-seleccion", "options"),
+    Output("buscador-seleccion", "value"),
+    Input("buscador-tipo", "value")
 )
-def actualizar_dropdown_filtro(tipo_entrada):
+def actualizar_dropdown_elementos_buscador(tipo_entrada):
     if tipo_entrada == 'obj':
         opciones = [{'label': obj, 'value': obj} for obj in ctx.objects]
     else:
         opciones = [{'label': attr, 'value': attr} for attr in ctx.properties]
     return opciones, [] 
 
+# 3) Actualizar las opciones del dropdown de selección del criterio de orden
+#    (que serán diferentes, en función de si se eligieron objetos o atributos)
+@app.callback(
+    Output("buscador-orden", "options"),
+    Output("buscador-orden", "value"),
+    Input("buscador-tipo", "value")
+)
+def actualizar_dropdown_orden_buscador(tipo_entrada):
+    if tipo_entrada == 'obj':
+        opciones = [{'label': 'Cardinal de la Extensión Ascendente', 'value': 'ext_asc'},
+                    {'label': 'Cardinal de la Extensión Descendente', 'value': 'ext_desc'}]
+        value='ext_asc'
+    else:
+        opciones = [{'label': 'Cardinal de la Intensión Ascendente', 'value': 'int_asc'},
+                    {'label': 'Cardinal de la Intensión Descendente', 'value': 'int_desc'}]
+        value='int_asc'
+    return opciones, value
 # ---------------------------------------------------------------------------------------
 # 3.4. Arrancar el servidor y ejecutar la aplicación
 

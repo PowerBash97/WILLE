@@ -10,6 +10,9 @@ __pycache__/
 # Archivos de sesión (opcional, por si pesan mucho)
 # *.wille
 
+# Archivos auxiliares
+*.zip
+
 # Archivos del sistema operativo
 .DS_Store
 Thumbs.db

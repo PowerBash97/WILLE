@@ -29,8 +29,8 @@ def layout_pantalla_inicio():
     return html.Div([
         html.Div([
             # i) Título de la aplicación
-            html.H1("WilLE", style={'fontSize': '48px', 'marginBottom': '10px', 'color': '#1976D2', 'fontFamily': 'sans-serif', 'textAlign': 'center'}),
-            html.H3("Wille's Interactive Lattice Explorer", style={'color': '#555', 'marginTop': '0', 'fontFamily': 'sans-serif', 'textAlign': 'center'}),
+            html.H1("WILLE", style={'fontSize': '48px', 'marginBottom': '10px', 'color': '#1976D2', 'fontFamily': 'sans-serif', 'textAlign': 'center'}),
+            html.H3("Web-based Interactive concept Lattice's Line diagram Explorer", style={'color': '#555', 'marginTop': '0', 'fontFamily': 'sans-serif', 'textAlign': 'center'}),
             html.Hr(style={'margin': '30px 0'}), # Línea horizontal separadora
             
             # Contenedor Flexbox para dividir la pantalla en dos columnas
@@ -157,8 +157,8 @@ def layout_pantalla_inicio():
 #        volviendo a derivar el resultado de la primera derivación - i.e. empleando el resultado de ACF para 
 #        calcular los conceptos formales tomando subconjuntos del conjunto de objetos o atributos)
 #
-#      - Un panel lateral izquierdo desplegable, dedicado a "Filtrar" a partir de un subconjunto
-#        de atributos u objetos aquellos conceptos formales que lo contengan en su intensión o 
+#      - Un panel lateral izquierdo desplegable, dedicado a "Buscar", a partir de un subconjunto
+#        de atributos u objetos, aquellos conceptos formales que lo contengan en su intensión o 
 #        extensión, respectivamente. Su diseño es muy similar al del panel de "Localizar"
 #
 #      - Finalmente, un panel informativo, en el borde inferior de la pantalla, que muestra la
@@ -169,8 +169,8 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
     return html.Div([
         # i) Título de la aplicación
         html.H1([
-            html.Span("WilLE", style={'color': '#1976D2', 'fontWeight': 'bold'}),
-            html.Span("Wille's Interactive Lattice Explorer", style={
+            html.Span("WILLE", style={'color': '#1976D2', 'fontWeight': 'bold'}),
+            html.Span("Web-based Interactive concept Lattice's Line diagram Explorer", style={
                 'color': 'black', 
                 'fontSize': '18px',     
                 'fontWeight': 'normal', 
@@ -337,7 +337,7 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
                 {
                     # Color si hay un Subconcepto oculto (Magenta)
                     'selector': '.indicador-sub',
-                    'style': {'color': '#C2185B'} # Magenta fuerte
+                    'style': {'color': '#C2185B'}
                 },
                 {
                     # Color (por defecto) si solo hay nodos normales ocultos (Gris)
@@ -452,16 +452,16 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
             "padding": "20px", "boxSizing": "border-box"
         }),
 
-        # vi) Panel desplegable para filtrados (situado en el borde izquierdo de la pantalla)
+        # vi) Panel desplegable para Búsquedas (situado en el borde izquierdo de la pantalla)
         #    (a partir de un subconjunto de atributos/objetos, permite obtener la lista de
         #    conceptos formales que lo contienen en su intensión/extensión, respectivamente,
-        #    y mostrarlos con diferentes criterios de ordenación (en orden descendente o ascendente  
-        #    del número de objetos en la extensión, o por orden lexicográfico de la intensión).
+        #    y mostrarlos con diferentes criterios de ordenación (en orden ascendente o descendente   
+        #    del número de objetos en la extensión, o de atributos en la intensión).
         html.Div([
             # a) Pestaña que asoma para abrir/cerrar (análogo al panel de localizar)
             html.Button(
-                "Filtro", 
-                id="btn-abrir-cerrar-filtrado",
+                "Buscador", 
+                id="btn-abrir-cerrar-buscador",
                 style={
                     "position": "absolute", 
                     "top": "50%", 
@@ -484,13 +484,13 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
             # b) Contenido del panel
 
             # Su título 
-            html.H3("Filtrado de Conceptos", style={"marginTop": "0", "fontFamily": "sans-serif"}),
+            html.H3("Búsqueda de Conceptos", style={"marginTop": "0", "fontFamily": "sans-serif"}),
                 
             # La primera pregunta (seleccionar si se van a considerar objetos o atributos)
             # (Análogo al panel de localizar)
             html.Label("1. Tipo de elementos", style={"fontWeight": "bold", "fontFamily": "sans-serif"}),
             dcc.RadioItems(
-                id="filtro-tipo",
+                id="buscador-tipo",
                 options=[
                     {'label': ' Objetos', 'value': 'obj'},
                     {'label': ' Atributos', 'value': 'attr'}
@@ -504,7 +504,7 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
             # (Análogo al panel de localizar)
             html.Label("2. Seleccionar elementos:", style={"fontWeight": "bold", "fontFamily": "sans-serif"}),
             dcc.Dropdown(
-                id="filtro-seleccion", 
+                id="buscador-seleccion", 
                 multi=True, 
                 placeholder="Seleccione..."
             ),
@@ -514,21 +514,14 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
             html.Label("3. Criterio de ordenación:", 
                        style={'marginTop': '15px', 'fontWeight': 'bold', 'fontFamily': 'sans-serif', 'display': 'block'}),
             dcc.Dropdown(
-                id="filtro-orden",
-                options=[
-                    {'label': 'Cardinal de la Extensión Ascendente', 'value': 'nivel_asc'},
-                    {'label': 'Cardinal de la Extensión Descendente', 'value': 'nivel_desc'},
-                    {'label': 'Orden Lexicográfico de la Intensión Ascendente', 'value': 'alfa_attr_asc'},
-                    {'label': 'Orden Lexicográfico de la Intensión Descendente', 'value': 'alfa_attr_desc'}
-                ],
-                value='nivel_asc', # Por defecto, está marcado el "Orden ascendente de Nivel"
+                id="buscador-orden",
                 clearable=False,
                 style={'fontFamily': "sans-serif", 'marginBottom': '15px'} 
             ),
                 
-            # Finalmente, un botón para ejecutar el filtrado, una vez se han seleccionado
+            # Finalmente, un botón para ejecutar la búsqueda, una vez se han seleccionado
             # las opciones correspondientes en las anteriores tres preguntas.
-            html.Button("Filtrar", id="btn-ejecutar-filtro", style={
+            html.Button("Buscar", id="btn-ejecutar-buscador", style={
                 "width": "100%", "padding": "10px", "backgroundColor": "#E64A19", 
                 "color": "white", "border": "none", "borderRadius": "5px", "cursor": "pointer",
                 "fontWeight": "bold", "fontSize": "14px"
@@ -537,8 +530,8 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
             # Barra horizontal que separa el botón anterior de los resultados
             html.Hr(),
 
-            # Caja de resultados (donde se mostrarán los resultados del filtrado)
-            html.Div(id="filtro-resultados", style={
+            # Caja de resultados (donde se mostrarán los resultados de la busqueda)
+            html.Div(id="buscador-resultados", style={
                 "marginTop": "15px", "whiteSpace": "pre-wrap", 
                 "fontFamily": "monospace", "backgroundColor": "#EDE7F6",
                 "padding": "10px", "borderRadius": "5px", "minHeight": "100px",
@@ -546,7 +539,7 @@ def layout_pantalla_principal(max_zoom, zoom_inicial, centro_inicial):
                 "overflowY": "auto"
             })
                 
-        ], id="panel-lateral-filtrado", style={ # Por defecto (al inicio) el panel está oculto ("left": "-350px")
+        ], id="panel-lateral-buscador", style={ # Por defecto (al inicio) el panel está oculto ("left": "-350px")
             "position": "fixed", "left": "-350px", "top": "0", "width": "350px", "height": "100vh",
             "backgroundColor": "#F8F9FA", "boxShadow": "2px 0 10px rgba(0,0,0,0.3)", 
             "zIndex": "1000", "transition": "left 0.3s ease-in-out", "padding": "20px", "boxSizing": "border-box"

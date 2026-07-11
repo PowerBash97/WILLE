@@ -7,7 +7,7 @@ from utils import (
     identificar_extremos_del_reticulo,
     filtrar_objetos_y_atributos_propios,
     calcular_concepto_formal_asociado,
-    filtrar_conceptos_formales_por_subconjunto
+    buscar_por_subconjunto
 )
 
 # ==============================================================================
@@ -131,29 +131,63 @@ def test_calcular_concepto_formal_asociado(monkeypatch, contexto_ejemplo):
     assert set(intension) == {'A', 'C'}
 
 
-# 5. Pruebas de Filtrado por Subconjunto y Control de Timeout en dicha operación
-def test_filtrar_conceptos_formales_exito(monkeypatch):
-    """Verifica que se localizan los conceptos que contienen los elementos buscados."""
+# 5. Pruebas de Búsqueda por Subconjunto y Control de Timeout en dicha operación
+def test_buscar_por_subconjunto_exito(monkeypatch):
+    """Verifica que se localizan los conceptos que contienen los elementos buscados
+       y que se extrae correctamente la información de vecindad si hay coincidencia 
+       exacta con la extensión/intensión de algún concepto formal."""
+    # Creamos los conceptos simulados
     c1 = ConceptoMock(['1', '2', '3'], ['A'])
     c2 = ConceptoMock(['1', '2'], ['A', 'B'])
     c3 = ConceptoMock(['3'], ['C'])
-    lista = [c1, c2, c3]
+    lista_conceptos = [c1, c2, c3]
+    concepto_a_id = {c1: "id_c1", c2: "id_c2", c3: "id_c3"}
+    
+    # Simulamos la estructura de datos que Cytoscape/nodos_master almacenaría para el concepto "c2"
+    # Simulamos la estructura de datos que Cytoscape/nodos_master almacenaría para c1 y c2
+    nodos_master = [
+        {
+            'data': {
+                'id': 'id_c1',
+                'super_inmediatos': [],
+                'sub_inmediatos': ['id_c2'] # c2 es subconcepto de c1
+            }
+        },
+        {
+            'data': {
+                'id': 'id_c2',
+                'super_inmediatos': ['id_c1'], # c1 es superconcepto de c2
+                'sub_inmediatos': []
+            }
+        }
+    ]
     
     monkeypatch.setattr("utils.MAX_TIMEOUT", 5.0) # Tiempo holgado (para asegurar que no se alcanza)
     
-    # Se busca los conceptos que tengan en su intensión 'A' -> c1 y c2
-    resultados, timeout = filtrar_conceptos_formales_por_subconjunto('attr', ['A'], lista)
+    # Búsqueda por atributo 'A' (Debe encontrar c1 y c2, y SÍ hay coincidencia exacta de intensión 
+    # para c1, siendo c2 su subconcepto inmediato)
+    resultados, timeout, base_cid, vecinos_super, vecinos_sub = buscar_por_subconjunto(
+        'attr', ['A'], lista_conceptos, concepto_a_id, nodos_master
+    )
     
     assert timeout is False
     assert len(resultados) == 2
     assert c1 in resultados
     assert c2 in resultados
-
-def test_filtrar_conceptos_formales_timeout(monkeypatch):
-    """Verifica que el bucle de filtrado se aborta si se excede el tiempo límite de seguridad."""
+    assert base_cid == "id_c1"              # Ha encontrado el concepto exacto
+    assert vecinos_super == []              # No tiene hijos en este mock
+    assert vecinos_sub == ["id_c2"]         # Ha recuperado correctamente a su vecino inferior ("c2") 
+          
+def test_buscar_por_subconjunto_timeout(monkeypatch):
+    """Verifica que el bucle de búsqueda se aborta si se excede el tiempo límite de seguridad."""
     
     # Se crea una lista enorme falsa para provocar demora
-    lista = [ConceptoMock(['1'], ['A']) for _ in range(1000)]
+    lista_conceptos = [ConceptoMock(['1'], ['A']) for _ in range(1000)]
+    
+    # Para el caso de timeout, podemos pasar diccionarios/listas vacías ya que el bucle 
+    # romperá en la primera etapa y nunca llegará a evaluar los vecinos.
+    concepto_a_id = {}
+    nodos_master = []
     
     # Se fuerza un timeout imposible (0 segundos)
     monkeypatch.setattr("utils.MAX_TIMEOUT", 0.0)
@@ -162,9 +196,11 @@ def test_filtrar_conceptos_formales_timeout(monkeypatch):
     tiempo_simulado = [0, 1] 
     monkeypatch.setattr(time, "time", lambda: tiempo_simulado.pop(0) if tiempo_simulado else 2)
     
-    resultados, timeout = filtrar_conceptos_formales_por_subconjunto('attr', ['A'], lista)
+    # Ejecutamos desempaquetando los 5 valores de retorno
+    resultados, timeout, base_cid, vecinos_super, vecinos_sub = buscar_por_subconjunto(
+        'attr', ['A'], lista_conceptos, concepto_a_id, nodos_master
+    )
     
-    # Debe abortar casi de inmediato
-    assert timeout is True
-    # Solo procesó un concepto (el que consumió el tiempo 0 antes de devolver 1)
-    assert len(resultados) < len(lista)
+    assert timeout is True                        # Debe abortar casi de inmediato
+    assert len(resultados) < len(lista_conceptos) # Rompió el ciclo prematuramente (Solo procesó un concepto: el que consumió el tiempo 0 antes de devolver 1)
+    assert base_cid is None                       # No llegó a evaluar coincidencias exactas

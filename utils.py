@@ -57,12 +57,12 @@ MARGEN_Y = ESPACIADO_Y * 0.5
 # los indicadores visuales de que hay más nodos ocultos fuera de este
 DELTA = 50 
 
-# vii) Tiempo de espera máximo tolerado al calcular filtrados (conveniente 
+# vii) Tiempo de espera máximo tolerado al calcular búsquedas (conveniente 
 # para casos con un retículo de conceptos cercano al límite de tamaño 
-# permitido), y número máximo de resultados a mostrar en un filtrado 
+# permitido), y número máximo de resultados a mostrar en una búsqueda 
 # (para no saturar tampoco el panel, con un scroll demasiado largo)
 MAX_TIMEOUT = 4.0 # En segundos
-MAX_RESULTADOS_FILTRO = 50
+MAX_RESULTADOS_BUSQUEDA = 50
 
 # viii) Umbral para el número de objetos y atributos (en la extensión e 
 # intensión, respectivamente) a mostrar en el panel inferior de la pantalla
@@ -199,10 +199,10 @@ def calcular_coordenadas_absolutas_diagrama(lista_conceptos, concepto_a_id):
 # Función auxiliar que identifica a los conceptos ínfimo y supremo globales
 def identificar_extremos_del_reticulo(lista_conceptos):
 
-    # Los nodos ínfimo global (nodo 0) y supremo global (nodo 1) son fáciles de
-    # reconocer -> simplemente son los que no tienen subconceptos ni superconceptos
-    # directos, respectivamente (pero por defecto - si p.e. el retículo colapsara 
-    # en un solo concepto formal, les asignamos a ambos el índice 0)
+    # Los nodos asociados al concepto ínfimo global (nodo 0) y supremo global (nodo 1) 
+    # son fáciles de reconocer -> simplemente son los que no tienen subconceptos ni 
+    # superconceptos directos, respectivamente (pero por defecto - si p.e. el retículo 
+    # colapsara en un solo concepto formal, les asignamos a ambos el índice 0)
     id_infimo = '0'
     id_supremo = '0'
     for i, c in enumerate(lista_conceptos):
@@ -221,9 +221,9 @@ def filtrar_objetos_y_atributos_propios(concepto):
 
     return objetos_propios, atributos_propios
 
-# ii) Algoritmos de localización por derivación y filtrado de conceptos formales
+# ii) Algoritmos de localización por derivación y búsqueda de conceptos formales
 #     - Localizar el concepto formal asociado a un subconjunto de elementos, por derivación
-#     - Filtrar aquellos conceptos formales conteniendo un cierto subconjunto de elementos
+#     - Buscar aquellos conceptos formales conteniendo un cierto subconjunto de elementos
 
 # Función auxiliar que calcula la extension e intension del concepto 
 # formal asociado a partir de un subconjunto de objetos o atributos:
@@ -237,19 +237,24 @@ def calcular_concepto_formal_asociado(tipo_elementos, lista_elementos, ctx):
     return extension, intension
 
 # Función auxiliar que calcula la sublista de conceptos resultantes tras 
-# filtrar por un subconjunto de objetos o atributos, y controla que se 
-# respete el timeout impuesto en los filtrados:
-def filtrar_conceptos_formales_por_subconjunto(tipo_elementos, lista_elementos, lista_conceptos):
-    # Para controlar que el tiempo de respuesta ante un filtrado no supere
+# buscar por un subconjunto de objetos o atributos, y controla que se 
+# respete el timeout impuesto para esta operación de búsqueda:
+def buscar_por_subconjunto(tipo_elementos, lista_elementos, lista_conceptos, concepto_a_id, nodos_master):
+    # Para controlar que el tiempo de respuesta ante una búsqueda no supere
     # el límite impuesto por "MAX_TIMEOUT", se inicia un contador de tiempo
     # nada más dispararse el callback
     start_time = time.time()
     timeout_alcanzado = False # E inicialmente, el timeout no se ha alcanzado aún
     
     resultados = [] # La lista de resultados inicialmente está vacía
+    base_cid = None # Identificador del concepto formal asociado al subconjunto (si existe)
+    vecinos_super = [] # Lista de superconceptos inmediatos al concepto formal asociado al subconjunto (si existe)
+    vecinos_sub = [] # Lista de subconceptos inmediatos al concepto formal asociado al subconjunto (si existe)
     
-    # Se itera sobre la lista de conceptos del retículo, en busca de aquellos
-    # que contengan el subconjunto de objetos/atributos solicitado en el panel
+    # 1) Busqueda de conceptos formales (simplemente se hace el cribado
+    #    por medio del subconjunto seleccionado, para lo cual se itera sobre la 
+    #    lista de conceptos del retículo, en busca de aquellos que contengan el 
+    #    subconjunto de objetos/atributos solicitado en el panel)
     for c in lista_conceptos:
         # Se comprueba el tiempo en cada iteración (cada concepto)
         # Y si se alcanza el timeout, se levanta la bandera "timeout_alcanzado"
@@ -269,4 +274,27 @@ def filtrar_conceptos_formales_por_subconjunto(tipo_elementos, lista_elementos, 
         else: # 'attr'
             if all(s in c.intent for s in lista_elementos):
                 resultados.append(c)
-    return resultados, timeout_alcanzado
+
+    # 2) A continuación, determinamos también si la selección exacta coincide con la 
+    #    extensión (si son objetos) o la intensión (si son atributos) de un concepto 
+    #    formal existente (También equivaldría a comprobar si el subconjunto seleccionado 
+    #    es cerrado bajo el operador de doble derivación)
+    if not timeout_alcanzado:
+        for c in lista_conceptos:
+            if tipo_elementos == 'obj' and set(c.extent) == set(lista_elementos):
+                base_cid = concepto_a_id[c]
+                break
+            elif set(c.intent) == set(lista_elementos): # 'attr'
+                base_cid = concepto_a_id[c]
+                break
+
+        # Si existe dicho concepto formal, extraemos sus vecinos superiores (superconceptos
+        # inmediatos) y sus vecinos inferiores (subconceptos inmediatos) de nodos_master
+        if base_cid:
+            for nodo in nodos_master:
+                if nodo['data']['id'] == base_cid:
+                    vecinos_super = nodo['data']['super_inmediatos']
+                    vecinos_sub = nodo['data']['sub_inmediatos']
+                    break
+        
+    return resultados, timeout_alcanzado, base_cid, vecinos_super, vecinos_sub
